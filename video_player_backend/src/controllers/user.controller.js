@@ -3,7 +3,7 @@ import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { deleteOnCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const options = {
   httpOnly: true,
@@ -256,6 +256,8 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Error while uploading avatar");
   }
 
+  const previousAvatarURL = req.user?.avatar;
+
   const currentUser = await User.findByIdAndUpdate(
     req.user?._id,
     {
@@ -265,9 +267,13 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     },
     { new: true }
   ).select("-password");
+
   if (!currentUser) {
     throw new ApiError(404, "User does not exist");
   }
+
+  await deleteOnCloudinary(previousAvatarURL);
+
   return res
     .status(200)
     .json(new ApiResponse(200, currentUser, "Avatar updated successfully"));
@@ -282,6 +288,8 @@ const updateCoverImage = asyncHandler(async (req, res) => {
   if (!coverImage.url) {
     throw new ApiError(400, "Error while uploading cover image");
   }
+
+  const previousCoverImageURL = req.user?.coverImage;
   const currentUser = await User.findByIdAndUpdate(
     req.user?._id,
     {
@@ -294,6 +302,7 @@ const updateCoverImage = asyncHandler(async (req, res) => {
   if (!currentUser) {
     throw new ApiError(404, "User does not exist");
   }
+  await deleteOnCloudinary(previousCoverImageURL);
   return res
     .status(200)
     .json(
