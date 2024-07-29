@@ -20,7 +20,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
         index: "search-videos",
         text: {
           query: query,
-          path: ["title", "description"], //search only on title, desc
+          path: ["title", "description"],
         },
       },
     });
