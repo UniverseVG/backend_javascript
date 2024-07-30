@@ -16,7 +16,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Video not found");
   }
 
-  const comments = await Comment.aggregate([
+  const comments = Comment.aggregate([
     {
       $match: {
         video: new mongoose.Types.ObjectId(videoId),
@@ -49,7 +49,10 @@ const getVideoComments = asyncHandler(async (req, res) => {
         isLiked: {
           $cond: {
             if: {
-              $in: [req.user?._id, "$likes.likedBy"],
+              $in: [
+                new mongoose.Types.ObjectId(req.user?._id),
+                "$likes.likedBy",
+              ],
             },
             then: true,
             else: false,

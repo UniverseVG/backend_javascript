@@ -89,7 +89,7 @@ const getPlaylistById = asyncHandler(async (req, res) => {
   const playlistVideos = await Playlist.aggregate([
     {
       $match: {
-        _id: new mongoose.Types.ObjectId(playlistId),
+        _id: new mongoose.Types.ObjectId(playlist._id),
       },
     },
     {
@@ -140,6 +140,7 @@ const getPlaylistById = asyncHandler(async (req, res) => {
           duration: 1,
           views: 1,
           createdAt: 1,
+          isPublished: 1,
         },
         owner: {
           _id: 1,
@@ -178,8 +179,8 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Video not found");
   }
   if (
-    (playlist.owner?.toString() && video.owner.toString()) !==
-    req.user?._id.toString()
+    playlist.owner?.toString() !== req.user?._id.toString() ||
+    video.owner.toString() !== req.user?._id.toString()
   ) {
     throw new ApiError(403, "You are not authorized to perform this action");
   }
@@ -226,8 +227,8 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Video not found");
   }
   if (
-    (playlist.owner?.toString() && video.owner.toString()) !==
-    req.user?._id.toString()
+    playlist.owner?.toString() !== req.user?._id.toString() ||
+    video.owner?.toString() !== req.user?._id.toString()
   ) {
     throw new ApiError(403, "You are not authorized to perform this action");
   }

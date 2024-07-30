@@ -30,7 +30,6 @@ const registerUser = asyncHandler(async (req, res) => {
   //   });
 
   const { fullName, email, username, password } = req.body;
-  // console.log(req.body);
   //   if (fullName === "") {
   //     throw new ApiError(400, "full name is required");
   //   }
@@ -43,8 +42,6 @@ const registerUser = asyncHandler(async (req, res) => {
     $or: [{ email }, { username }],
   });
 
-  // console.log(existingUser);
-
   if (existingUser) {
     throw new ApiError(
       409,
@@ -52,8 +49,7 @@ const registerUser = asyncHandler(async (req, res) => {
     );
   }
 
-  // console.log(req.files);
-  const avatarLocalPath = req.files?.avatar[0]?.path;
+  const avatarLocalPath = req.files?.avatar?.[0]?.path;
 
   let coverImageLocalPath;
   if (
@@ -180,8 +176,6 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
     const { accessToken, refreshToken: newRefreshToken } =
       await generateAccessAndRefreshToken(user._id);
-
-    console.log(accessToken, newRefreshToken);
 
     return res
       .status(200)
@@ -366,7 +360,6 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
       },
     },
   ]);
-  console.log(channel);
 
   if (!channel?.length) {
     throw new ApiError(404, "Channel not found");

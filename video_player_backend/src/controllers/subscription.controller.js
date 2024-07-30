@@ -49,7 +49,7 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid channel id");
   }
 
-  const subscribers = await Subscription.aggregate([
+  let subscribers = await Subscription.aggregate([
     {
       $match: {
         channel: new mongoose.Types.ObjectId(channelId),
@@ -109,9 +109,12 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
     },
   ]);
 
-  if (!subscribers?.length) {
-    throw new ApiError(404, "Subscribers not found");
+  if (subscribers.length === 0) {
+    subscribers = {
+      subscribers: 0,
+    };
   }
+
   return res
     .status(200)
     .json(
@@ -122,6 +125,7 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
 // controller to return channel list to which user has subscribed
 const getSubscribedChannels = asyncHandler(async (req, res) => {
   const { subscriberId } = req.params;
+
   if (!isValidObjectId(subscriberId)) {
     throw new ApiError(400, "Invalid subscriber id");
   }
@@ -181,10 +185,6 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
       },
     },
   ]);
-
-  if (!subscribedChannels?.length) {
-    throw new ApiError(404, "No channels found");
-  }
 
   return res
     .status(200)
